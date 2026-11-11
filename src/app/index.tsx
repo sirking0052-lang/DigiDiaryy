@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {View,Text,StyleSheet,Pressable,Animated,StatusBar,} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+
 
 export default function Index() {
   const [screen, setScreen] = useState(0);
@@ -160,9 +162,7 @@ export default function Index() {
 
           <Pressable
             style={styles.button}
-            onPress={() => {
-              console.log('Navigate to onboarding');
-            }}
+            onPress={() => router.replace('/login')}
           >
             <Text style={styles.buttonText}>
               Get Started
