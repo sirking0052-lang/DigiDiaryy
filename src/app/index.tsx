@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {View,Text,StyleSheet,Pressable,Animated,StatusBar,} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StatusBar, StyleSheet, Text, View, } from 'react-native';
 
 export default function Index() {
   const [screen, setScreen] = useState(0);
@@ -162,7 +161,8 @@ export default function Index() {
 
           <Pressable
             style={styles.button}
-            onPress={() => router.replace('/login')}
+            onPress={() => {router.push('/login')
+            }}
           >
             <Text style={styles.buttonText}>
               Get Started
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#FFFFFF',
     letterSpacing: -0.5,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
 
   finalLogo: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#000000',
     letterSpacing: -0.5,
@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     bottom: 60,
-    width: 200,
-    height: 64,
+    width: 105,
+    height: 34,
     borderRadius: 30,
     backgroundColor: '#7CC9E0',
     justifyContent: 'center',
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    fontSize: 20,
+    fontSize: 11,
     fontWeight: 'bold',
     color: '#092B54',
   },
