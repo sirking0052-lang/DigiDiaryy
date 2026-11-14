@@ -5,11 +5,54 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+
 export default function WorkNotes() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const router = useRouter();
+
+  // NAVIGATION FUNCTION
   const handleNavigation = (screen: string) => {
-    console.log("Navigate to:", screen);
+    const routes: Record<string, string> = {
+      allNotes: "/allNotes",
+      "All Notes": "/allNotes",
+      "/allNotes": "/allNotes",
+
+      workNotes: "/workNotes",
+      "Work Notes": "/workNotes",
+      "/workNotes": "/workNotes",
+
+      PersonalNotes: "/PersonalNotes",
+      "Personal Notes": "/PersonalNotes",
+      "/PersonalNotes": "/PersonalNotes",
+
+      SchoolNotes: "/SchoolNotes",
+      "School Notes": "/SchoolNotes",
+      "/SchoolNotes": "/SchoolNotes",
+
+      calendar: "/calendar",
+      Calendar: "/calendar",
+      "/calendar": "/calendar",
+
+      trash: "/trash",
+      Trash: "/trash",
+      "/trash": "/trash",
+
+      search: "/search",
+      Search: "/search",
+      "/search": "/search",
+
+      addNotes: "/addNotes",
+      "/addNotes": "/addNotes",
+    };
+
+    const destination = routes[screen];
+
+    if (destination) {
+      setSidebarVisible(false);
+      router.replace(destination as any);
+    } else {
+      console.log("No route found for:", screen);
+    }
   };
 
   return (
@@ -47,7 +90,7 @@ export default function WorkNotes() {
             </Pressable>
 
             {/* SEARCH */}
-            <Pressable onPress={() => router.replace("/search")}>
+            <Pressable onPress={() => handleNavigation("search")}>
               <Ionicons name="search-outline" size={32} color="#000000" />
             </Pressable>
           </View>

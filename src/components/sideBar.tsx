@@ -1,10 +1,24 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Animated,
+  Dimensions,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+import { supabase } from "@/lib/supabase";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
 const SIDEBAR_WIDTH = Math.min(SCREEN_WIDTH * 0.82, 320);
 
 type SidebarProps = {
@@ -19,11 +33,82 @@ export default function Sidebar({
   onNavigate = () => {},
 }: SidebarProps) {
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  // USER ACCOUNT DETAILS
+  const [userName, setUserName] = useState("Loading...");
+  const [userEmail, setUserEmail] = useState("Loading...");
 
   const slideAnim = useRef(
     new Animated.Value(-SIDEBAR_WIDTH)
   ).current;
 
+  // GET CURRENT LOGGED-IN USER
+  useEffect(() => {
+    let mounted = true;
+
+    const updateUserDetails = (user: any) => {
+      if (!mounted) return;
+
+      if (!user) {
+        setUserName("User Name");
+        setUserEmail("User Email");
+        return;
+      }
+
+      const metadata = user.user_metadata ?? {};
+
+      const accountName =
+        metadata.full_name ||
+        metadata.name ||
+        metadata.display_name ||
+        metadata.username;
+
+      const fallbackName = user.email
+        ? user.email.split("@")[0]
+        : "User";
+
+      setUserName(
+        typeof accountName === "string" && accountName.trim()
+          ? accountName
+          : fallbackName
+      );
+
+      setUserEmail(user.email || "No email available");
+    };
+
+    // GET EXISTING SESSION
+    const loadUser = async () => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+
+        if (error) {
+          console.error("Unable to get user:", error.message);
+          return;
+        }
+
+        updateUserDetails(data.user);
+      } catch (error) {
+        console.error("Get user error:", error);
+      }
+    };
+
+    loadUser();
+
+    // LISTEN FOR LOGIN AND LOGOUT
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      updateUserDetails(session?.user ?? null);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // SIDEBAR ANIMATION
   useEffect(() => {
     if (visible) {
       slideAnim.setValue(-SIDEBAR_WIDTH);
@@ -37,17 +122,61 @@ export default function Sidebar({
       slideAnim.setValue(-SIDEBAR_WIDTH);
       setLogoutOpen(false);
     }
-  }, [visible]);
+  }, [visible, slideAnim]);
 
-  const handleNavigate = (screen: string) => {
-    onClose();
-    onNavigate(screen);
-  };
-
-  const confirmLogout = () => {
+  // CLOSE SIDEBAR
+  const closeSidebar = () => {
     setLogoutOpen(false);
     onClose();
-    router.replace('/login');
+  };
+
+  // NAVIGATION
+  const navigateTo = (path: string) => {
+    closeSidebar();
+    router.replace(path as any);
+  };
+
+  // BOOKMARK
+  const openBookmark = () => {
+    closeSidebar();
+    onNavigate("bookmark");
+
+    Alert.alert(
+      "Bookmark",
+      "The Bookmark screen is not yet available."
+    );
+  };
+
+  // LOGOUT
+  const confirmLogout = async () => {
+    if (logoutLoading) return;
+
+    try {
+      setLogoutLoading(true);
+
+      const { error } = await supabase.auth.signOut({
+        scope: "local",
+      });
+
+      if (error) {
+        Alert.alert("Logout Failed", error.message);
+        return;
+      }
+
+      setLogoutOpen(false);
+      onClose();
+
+      router.replace("/login" as any);
+    } catch (error) {
+      console.error("Logout error:", error);
+
+      Alert.alert(
+        "Logout Failed",
+        "Something went wrong. Please try again."
+      );
+    } finally {
+      setLogoutLoading(false);
+    }
   };
 
   return (
@@ -56,14 +185,22 @@ export default function Sidebar({
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={() => (logoutOpen ? setLogoutOpen(false) : onClose())}
+      onRequestClose={() => {
+        if (logoutOpen) {
+          setLogoutOpen(false);
+        } else {
+          closeSidebar();
+        }
+      }}
     >
       <View style={styles.modalContainer}>
-
         {/* OUTSIDE OVERLAY */}
-        <View style={styles.overlay} />
+        <Pressable
+          style={styles.overlay}
+          onPress={closeSidebar}
+        />
 
-        {/* SIDEBAR PANEL */}
+        {/* SIDEBAR */}
         <Animated.View
           style={[
             styles.sidebarWrapper,
@@ -74,19 +211,18 @@ export default function Sidebar({
           ]}
         >
           <LinearGradient
-            colors={['#FFFFFF', '#80CCE6']}
+            colors={["#FFFFFF", "#80CCE6"]}
             style={styles.background}
           >
-
             <View style={styles.innerContainer}>
-
               {/* BACK BUTTON */}
               <Pressable
                 style={styles.backButton}
-                onPress={onClose}
+                onPress={closeSidebar}
+                hitSlop={10}
               >
                 <Image
-                  source={require('../../assets/sidebar/BackSidebar.png')}
+                  source={require("../../assets/sidebar/BackSidebar.png")}
                   style={styles.backImage}
                   resizeMode="contain"
                 />
@@ -94,45 +230,47 @@ export default function Sidebar({
 
               {/* PROFILE */}
               <View style={styles.profileContainer}>
-
                 <Image
-                  source={require('../../assets/sidebar/profile.png')}
+                  source={require("../../assets/sidebar/profile.png")}
                   style={styles.profileImage}
                   resizeMode="contain"
                 />
 
                 <View style={styles.textContainer}>
-                  <Text style={styles.userName}>
-                    User Name
+                  <Text
+                    style={styles.userName}
+                    numberOfLines={1}
+                  >
+                    {userName}
                   </Text>
 
-                  <Text style={styles.userEmail}>
-                    User Email
+                  <Text
+                    style={styles.userEmail}
+                    numberOfLines={1}
+                  >
+                    {userEmail}
                   </Text>
                 </View>
 
                 <View style={styles.line} />
-
               </View>
 
-              {/* MENU LIST */}
+              {/* MENU */}
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 style={styles.menuScroll}
+                contentContainerStyle={styles.menuContent}
               >
-
-                {/* CATEGORIES */}
                 <View style={styles.categoriesContainer}>
-
+                  {/* CATEGORIES */}
                   <Text style={styles.sectionTitle}>
                     CATEGORIES
                   </Text>
 
                   <View style={styles.categoriesList}>
-
                     <Pressable
                       style={styles.sidebarButton}
-                      onPress={() => router.replace('/allNotes')}
+                      onPress={() => navigateTo("/allNotes")}
                     >
                       <Text style={styles.sidebarTextButton}>
                         All Notes
@@ -141,7 +279,7 @@ export default function Sidebar({
 
                     <Pressable
                       style={styles.sidebarButton}
-                      onPress={() => router.replace('/workNotes')}
+                      onPress={() => navigateTo("/workNotes")}
                     >
                       <Text style={styles.sidebarTextButton}>
                         Work
@@ -150,7 +288,7 @@ export default function Sidebar({
 
                     <Pressable
                       style={styles.sidebarButton}
-                      onPress={() => router.replace('/PersonalNotes')}
+                      onPress={() => navigateTo("/PersonalNotes")}
                     >
                       <Text style={styles.sidebarTextButton}>
                         Personal
@@ -159,13 +297,12 @@ export default function Sidebar({
 
                     <Pressable
                       style={styles.sidebarButton}
-                      onPress={() => router.replace('/SchoolNotes')}
+                      onPress={() => navigateTo("/SchoolNotes")}
                     >
                       <Text style={styles.sidebarTextButton}>
                         School
                       </Text>
                     </Pressable>
-
                   </View>
 
                   {/* OTHERS */}
@@ -174,10 +311,9 @@ export default function Sidebar({
                   </Text>
 
                   <View style={styles.categoriesList}>
-
                     <Pressable
                       style={styles.sidebarButton}
-                      onPress={() => handleNavigate('bookmark')}
+                      onPress={openBookmark}
                     >
                       <Text style={styles.sidebarTextButton}>
                         Bookmark
@@ -186,7 +322,7 @@ export default function Sidebar({
 
                     <Pressable
                       style={styles.sidebarButton}
-                      onPress={() => handleNavigate('calendar')}
+                      onPress={() => navigateTo("/calendar")}
                     >
                       <Text style={styles.sidebarTextButton}>
                         Calendar
@@ -195,25 +331,22 @@ export default function Sidebar({
 
                     <Pressable
                       style={styles.sidebarButton}
-                      onPress={() => router.push('/trash')}
+                      onPress={() => navigateTo("/trash")}
                     >
                       <Text style={styles.sidebarTextButton}>
                         Trash
                       </Text>
                     </Pressable>
-
                   </View>
-
                 </View>
-
               </ScrollView>
 
               {/* LOGOUT */}
               <View style={styles.logoutButtonContainer}>
-
                 <Pressable
                   style={styles.logoutButton}
                   onPress={() => setLogoutOpen(true)}
+                  disabled={logoutLoading}
                 >
                   <Ionicons
                     name="log-out-outline"
@@ -225,68 +358,80 @@ export default function Sidebar({
                     LOG OUT
                   </Text>
                 </Pressable>
-
               </View>
-
             </View>
-
           </LinearGradient>
         </Animated.View>
 
-        {/* LOGOUT CONFIRMATION DIALOG (drawn last so it sits on top of the sidebar) */}
+        {/* LOGOUT CONFIRMATION */}
         {logoutOpen && (
           <View style={styles.dialogRoot}>
             <Pressable
               style={styles.dialogBackdrop}
-              onPress={() => setLogoutOpen(false)}
+              onPress={() => {
+                if (!logoutLoading) {
+                  setLogoutOpen(false);
+                }
+              }}
             />
 
             <View style={styles.dialog}>
-              <Text style={styles.dialogTitle}>Log out?</Text>
+              <Text style={styles.dialogTitle}>
+                Log out?
+              </Text>
+
               <Text style={styles.dialogMessage}>
                 Are you sure you want to log out?
               </Text>
 
               <View style={styles.dialogActions}>
-                <Pressable onPress={confirmLogout}>
-                  <Text style={styles.dialogButton}>Yes</Text>
+                <Pressable
+                  onPress={confirmLogout}
+                  disabled={logoutLoading}
+                >
+                  <Text style={styles.dialogButton}>
+                    {logoutLoading ? "Please wait..." : "Yes"}
+                  </Text>
                 </Pressable>
 
-                <Pressable onPress={() => setLogoutOpen(false)}>
-                  <Text style={styles.dialogButton}>No</Text>
+                <Pressable
+                  onPress={() => setLogoutOpen(false)}
+                  disabled={logoutLoading}
+                >
+                  <Text style={styles.dialogButton}>
+                    No
+                  </Text>
                 </Pressable>
               </View>
             </View>
           </View>
         )}
-
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-
   modalContainer: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
 
   overlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: "rgba(0,0,0,0.35)",
   },
 
   sidebarWrapper: {
-    height: '100%',
-    position: 'absolute',
+    height: "100%",
+    position: "absolute",
     left: 0,
     top: 0,
-    overflow: 'hidden',
+    overflow: "hidden",
     elevation: 15,
   },
 
@@ -304,7 +449,7 @@ const styles = StyleSheet.create({
   backButton: {
     width: 35,
     height: 35,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
 
   backImage: {
@@ -314,8 +459,8 @@ const styles = StyleSheet.create({
 
   // PROFILE
   profileContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 20,
   },
 
@@ -326,25 +471,28 @@ const styles = StyleSheet.create({
 
   textContainer: {
     marginTop: 15,
-    alignItems: 'center',
+    alignItems: "center",
+    width: "100%",
   },
 
   userName: {
     fontSize: 19,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontWeight: "bold",
+    color: "#000000",
+    maxWidth: "100%",
   },
 
   userEmail: {
     fontSize: 13,
-    color: '#555555',
+    color: "#555555",
     marginTop: 4,
+    maxWidth: "100%",
   },
 
   line: {
-    backgroundColor: '#CCCBCB',
+    backgroundColor: "#CCCBCB",
     height: 2,
-    width: '100%',
+    width: "100%",
     marginTop: 20,
   },
 
@@ -353,14 +501,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  menuContent: {
+    flexGrow: 1,
+  },
+
   categoriesContainer: {
     paddingTop: 22,
   },
 
   sectionTitle: {
-    color: '#777777',
+    color: "#777777",
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   categoriesList: {
@@ -368,59 +520,62 @@ const styles = StyleSheet.create({
   },
 
   sidebarButton: {
-    height: 42,
+    minHeight: 42,
     marginTop: 3,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 8,
   },
 
   sidebarTextButton: {
     fontSize: 17,
-    color: '#000000',
+    color: "#000000",
   },
 
   // LOGOUT
   logoutButtonContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingTop: 12,
   },
 
   logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
+    padding: 8,
   },
 
   logoutText: {
     fontSize: 19,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontWeight: "bold",
+    color: "#000000",
   },
 
   // LOGOUT DIALOG
   dialogRoot: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+    elevation: 100,
   },
 
   dialogBackdrop: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
 
   dialog: {
-    width: '85%',
-    backgroundColor: '#FFFFFF',
+    width: "85%",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     paddingHorizontal: 24,
     paddingTop: 24,
@@ -430,26 +585,25 @@ const styles = StyleSheet.create({
 
   dialogTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontWeight: "bold",
+    color: "#000000",
   },
 
   dialogMessage: {
     marginTop: 16,
     fontSize: 16,
-    color: '#7A7A7A',
+    color: "#7A7A7A",
   },
 
   dialogActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     gap: 28,
     marginTop: 50,
   },
 
   dialogButton: {
     fontSize: 18,
-    color: '#7CC9E0',
+    color: "#7CC9E0",
   },
-
 });
