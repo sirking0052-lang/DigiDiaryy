@@ -49,6 +49,8 @@ export default function RootLayout() {
       <Stack.Screen name="allNotes" />
       <Stack.Screen name="PersonalNotes" />
       <Stack.Screen name="SchoolNotes" />
+      <Stack.Screen name="addNotes"/>
+      <Stack.Screen name="categoriesModal"/>
     </Stack>
   );
 }

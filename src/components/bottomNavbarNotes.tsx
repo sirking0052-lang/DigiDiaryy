@@ -74,7 +74,7 @@ export default function BottomNavbar({
       {/* FLOATING ADD BUTTON */}
       <Pressable
         style={styles.addButton}
-        onPress={() => router.replace('/addNotes')}
+        onPress={() => router.push('/addNotes')}
       >
         <Ionicons
           name="add"
