@@ -1,10 +1,54 @@
-import React from 'react';
-import {Image,StatusBar,StyleSheet,Text,TextInput,TouchableOpacity,View,} from 'react-native';
+
+import { useState } from 'react';
+import {
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { supabase } from '../lib/supabase';
 
 export default function Login() {
   const router = useRouter();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert('Missing Information', 'Please enter your email and password.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: password,
+      });
+
+      if (error) {
+        Alert.alert('Login Failed', error.message);
+        return;
+      }
+
+      router.replace('/allNotes');
+
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -45,6 +89,10 @@ export default function Login() {
               placeholder="Email or Phone Number"
               placeholderTextColor="#555"
               keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+              editable={!loading}
             />
           </View>
 
@@ -60,12 +108,16 @@ export default function Login() {
               placeholder="Password"
               placeholderTextColor="#999"
               secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              editable={!loading}
             />
           </View>
 
           {/* FORGOT PASSWORD */}
           <TouchableOpacity
             onPress={() => router.push('/forgotpass')}
+            disabled={loading}
           >
             <Text
               style={[
@@ -80,12 +132,20 @@ export default function Login() {
 
           {/* LOGIN BUTTON */}
           <TouchableOpacity
-            onPress={() => router.replace('/allNotes')}
-            style={styles.loginButton}
+            onPress={handleLogin}
+            style={[
+              styles.loginButton,
+              loading && { opacity: 0.7 },
+            ]}
+            disabled={loading}
           >
-            <Text style={styles.loginText}>
-              Login
-            </Text>
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.loginText}>
+                Login
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </LinearGradient>

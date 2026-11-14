@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StatusBar, StyleSheet, Text, View, } from 'react-native';
 
-export default function CreateWorkNotes(){
+export default function addNotes(){
     return(
         <View>
             <View></View>

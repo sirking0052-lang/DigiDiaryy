@@ -1,6 +1,7 @@
 import React from 'react';
 import {View,StyleSheet,Pressable,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 type Props = {
   activeTab?: string;
@@ -73,7 +74,7 @@ export default function BottomNavbar({
       {/* FLOATING ADD BUTTON */}
       <Pressable
         style={styles.addButton}
-        onPress={() => onNavigate('add')}
+        onPress={() => router.replace('/addNotes')}
       >
         <Ionicons
           name="add"
