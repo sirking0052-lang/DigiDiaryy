@@ -49,7 +49,7 @@ export default function AllNotes() {
             </Pressable>
 
             {/* SEARCH */}
-            <Pressable onPress={() => router.replace("/search")}>
+            <Pressable onPress={() => router.push('/search')}>
               <Ionicons name="search-outline" size={32} color="#000000" />
             </Pressable>
           </View>

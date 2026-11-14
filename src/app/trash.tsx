@@ -1,18 +1,36 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import BottomNavbarNotes from '../components/bottomNavbarNotes';
-import Sidebar from '../components/sideBar';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {ScrollView,StatusBar,StyleSheet,Text,TouchableOpacity,View,} from "react-native";
+import BottomNavbarNotes from "../components/bottomNavbarNotes";
+import Sidebar from "../components/sideBar";
 
-type DeletedNote = { id: string; category: string; text: string; createdAt: Date };
+type DeletedNote = {
+  id: string;
+  category: string;
+  text: string;
+  createdAt: Date;
+};
 
-const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const MONTHS = [
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OCT",
+  "NOV",
+  "DEC",
+];
 
 const formatDate = (d: Date) => {
   const h = d.getHours();
-  const m = d.getMinutes().toString().padStart(2, '0');
-  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${h % 12 || 12}:${m} ${h >= 12 ? 'PM' : 'AM'}`;
+  const m = d.getMinutes().toString().padStart(2, "0");
+  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${h % 12 || 12}:${m} ${h >= 12 ? "PM" : "AM"}`;
 };
 
 export default function Trash() {
@@ -20,7 +38,8 @@ export default function Trash() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [deletedNotes, setDeletedNotes] = useState<DeletedNote[]>([]);
 
-  const deleteForever = (id: string) => setDeletedNotes((prev) => prev.filter((n) => n.id !== id));
+  const deleteForever = (id: string) =>
+    setDeletedNotes((prev) => prev.filter((n) => n.id !== id));
 
   return (
     <View style={styles.container}>
@@ -65,7 +84,10 @@ export default function Trash() {
                   <Text style={styles.footerText}>Restore</Text>
                 </TouchableOpacity>
                 <View style={styles.footerDivider} />
-                <TouchableOpacity style={styles.footerButton} onPress={() => deleteForever(note.id)}>
+                <TouchableOpacity
+                  style={styles.footerButton}
+                  onPress={() => deleteForever(note.id)}
+                >
                   <Text style={styles.footerText}>Delete</Text>
                 </TouchableOpacity>
               </View>
@@ -85,52 +107,52 @@ export default function Trash() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 22,
     marginTop: 50,
   },
   logo: {
     fontSize: 30,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 10,
   },
   blue: {
-    color: '#7CC9E0',
+    color: "#7CC9E0",
   },
   titleBar: {
     marginTop: 12,
     height: 50,
     borderBottomWidth: 1,
-    borderColor: '#999',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    borderColor: "#999",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
     paddingRight: 14,
   },
   emptyWrap: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyText: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#4F5B62',
+    fontWeight: "bold",
+    color: "#4F5B62",
   },
   scroll: {
     padding: 14,
     paddingBottom: 140,
   },
   card: {
-    backgroundColor: '#A5D8EA',
+    backgroundColor: "#A5D8EA",
     borderRadius: 40,
     borderWidth: 1,
-    borderColor: '#6C77F0',
-    overflow: 'hidden',
+    borderColor: "#6C77F0",
+    overflow: "hidden",
     elevation: 4,
     marginBottom: 20,
   },
@@ -142,31 +164,31 @@ const styles = StyleSheet.create({
   },
   noteDate: {
     fontSize: 13,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: "#000",
   },
   noteText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#2B3A42',
+    color: "#2B3A42",
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     height: 40,
     borderTopWidth: 1,
-    borderColor: '#4A6572',
+    borderColor: "#4A6572",
   },
   footerButton: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   footerDivider: {
     width: 1,
-    backgroundColor: '#4A6572',
+    backgroundColor: "#4A6572",
   },
   footerText: {
     fontSize: 14,
-    color: '#4A6572',
+    color: "#4A6572",
   },
 });
