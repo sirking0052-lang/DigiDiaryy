@@ -1,19 +1,28 @@
 import { useRouter } from 'expo-router';
 import { Image, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+
 export default function CreateAccount() {
     const router = useRouter();
   return (
     <View style={styles.container}>
       <StatusBar hidden />
 
+      <LinearGradient
+        colors={['#EAF8FC', '#edfbff', '#83CDE2']}
+        style={styles.background}
+      >
+
       <Text style={styles.logo}>
         DIGI<Text style={styles.blue}>DIARY</Text>
       </Text>
 
       <View style={styles.form}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Join us and start your journey</Text>
-
+        <View style={{alignItems: 'center'}}>
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Join us and start your journey</Text>
+        </View>
+      
         <View style={styles.inputBox}>
           <TextInput style={styles.input} placeholder="Name:" placeholderTextColor="#999" />
         </View>
@@ -55,6 +64,7 @@ export default function CreateAccount() {
           <Text style={styles.footerLink}>Sign in</Text>
         </TouchableOpacity>
       </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -62,8 +72,12 @@ export default function CreateAccount() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    width: '100%'
+  },
+  background: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center'
   },
   logo: {
     fontSize: 40,
@@ -76,6 +90,7 @@ const styles = StyleSheet.create({
   form: {
     width: 270,
     marginTop: 70,
+    
   },
   title: {
     fontSize: 30,
@@ -158,7 +173,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#A5D8EA',
     borderTopWidth: 1,
     borderColor: '#7CC9E0',
   },
