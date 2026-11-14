@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    fontSize: 20,
+    fontSize: 40,
     fontWeight: 'bold',
     color: '#FFFFFF',
     letterSpacing: -0.5,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
 
   finalLogo: {
-    fontSize: 20,
+    fontSize: 40,
     fontWeight: 'bold',
     color: '#000000',
     letterSpacing: -0.5,
@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     bottom: 60,
-    width: 105,
-    height: 34,
+    width: 200,
+    height: 60,
     borderRadius: 30,
     backgroundColor: '#7CC9E0',
     justifyContent: 'center',
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    fontSize: 11,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#092B54',
   },
