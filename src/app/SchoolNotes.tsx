@@ -133,7 +133,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   categoryText: {
     fontSize: 12,
     color: "#000000",
