@@ -1,8 +1,4 @@
-import React, { useState } from 'react';
-import {View,Text,TextInput,StyleSheet,StatusBar,Pressable,ScrollView,} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function categoriesModal(){
     return(

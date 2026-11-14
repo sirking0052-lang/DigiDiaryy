@@ -57,7 +57,7 @@ export default function AddNotes() {
             </Pressable>
           </View>
 
-          <Pressable onPress={() => router.push("/categoriesModal")}>
+          <Pressable onPress={() => router.push('/categoriesModal')}>
             <Ionicons name="ellipsis-vertical" size={22} color="#777" />
           </Pressable>
         </View>
