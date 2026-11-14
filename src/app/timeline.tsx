@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ReactNode, useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BottomNavbarNotes from '../components/bottomNavbarNotes';
 import Sidebar from '../components/sideBar';
 
@@ -45,10 +45,11 @@ function CardFooter({ onEdit, onDelete }: { onEdit?: () => void; onDelete?: () =
 }
 
 export default function Timeline() {
-     const router = useRouter();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState<Category | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
   // newest first. For oldest first, use a.createdAt.getTime() - b.createdAt.getTime()
   const visibleNotes = notes
@@ -56,6 +57,11 @@ export default function Timeline() {
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   const deleteNote = (id: string) => setNotes((prev) => prev.filter((n) => n.id !== id));
+
+  const confirmDelete = () => {
+    if (noteToDelete) deleteNote(noteToDelete);
+    setNoteToDelete(null);
+  };
 
   return (
     <View style={styles.container}>
@@ -76,7 +82,7 @@ export default function Timeline() {
         <Text style={styles.titleText}>TIMELINE VIEW</Text>
         <View style={styles.titleIcons}>
           {selected === null && (
-            <TouchableOpacity style={{ marginRight: 8 }}>
+            <TouchableOpacity style={{ marginRight: 8 }} onPress={() => router.push('/search')}>
               <Ionicons name="search" size={26} color="#4A6572" />
             </TouchableOpacity>
           )}
@@ -114,7 +120,7 @@ export default function Timeline() {
                     <Text style={styles.noteDate}>{formatDate(note.createdAt)}</Text>
                     <Text style={styles.noteText}>{note.text}</Text>
                   </View>
-                  <CardFooter onDelete={() => deleteNote(note.id)} />
+                  <CardFooter onDelete={() => setNoteToDelete(note.id)} />
                 </View>
               </TimelineRow>
             ))}
@@ -123,6 +129,36 @@ export default function Timeline() {
       </ScrollView>
 
       <BottomNavbarNotes />
+
+      {/* DELETE CONFIRMATION DIALOG */}
+      <Modal
+        visible={noteToDelete !== null}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setNoteToDelete(null)}
+      >
+        <View style={styles.dialogRoot}>
+          <Pressable style={styles.dialogBackdrop} onPress={() => setNoteToDelete(null)} />
+
+          <View style={styles.dialog}>
+            <Text style={styles.dialogTitle}>Delete</Text>
+            <Text style={styles.dialogMessage}>
+              Are you sure you want to move the note to the trash can?
+            </Text>
+
+            <View style={styles.dialogActions}>
+              <Pressable onPress={() => setNoteToDelete(null)}>
+                <Text style={styles.dialogButton}>Cancel</Text>
+              </Pressable>
+
+              <Pressable onPress={confirmDelete}>
+                <Text style={styles.dialogButton}>Ok</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* drawn last so it sits on top of everything */}
       <Sidebar visible={menuOpen} onClose={() => setMenuOpen(false)} />
@@ -264,5 +300,49 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     color: '#4A6572',
+  },
+
+  // DELETE DIALOG
+  dialogRoot: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dialogBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  dialog: {
+    width: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 20,
+    elevation: 8,
+  },
+  dialogTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  dialogMessage: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#7A7A7A',
+  },
+  dialogActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 28,
+    marginTop: 40,
+  },
+  dialogButton: {
+    fontSize: 18,
+    color: '#7CC9E0',
   },
 });

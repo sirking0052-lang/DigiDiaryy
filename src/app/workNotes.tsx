@@ -2,12 +2,12 @@ import BottomNavbar from "@/components/bottomNavbarNotes";
 import Sidebar from "@/components/sideBar";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
-
 export default function WorkNotes() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
-
+  const router = useRouter();
   const handleNavigation = (screen: string) => {
     console.log("Navigate to:", screen);
   };
@@ -47,7 +47,7 @@ export default function WorkNotes() {
             </Pressable>
 
             {/* SEARCH */}
-            <Pressable onPress={() => handleNavigation("search")}>
+            <Pressable onPress={() => router.replace("/search")}>
               <Ionicons name="search-outline" size={32} color="#000000" />
             </Pressable>
           </View>

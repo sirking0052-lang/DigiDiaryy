@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View, } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SIDEBAR_WIDTH = Math.min(SCREEN_WIDTH * 0.82, 320);
 
@@ -17,6 +18,7 @@ export default function Sidebar({
   onClose,
   onNavigate = () => {},
 }: SidebarProps) {
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const slideAnim = useRef(
     new Animated.Value(-SIDEBAR_WIDTH)
@@ -33,6 +35,7 @@ export default function Sidebar({
       }).start();
     } else {
       slideAnim.setValue(-SIDEBAR_WIDTH);
+      setLogoutOpen(false);
     }
   }, [visible]);
 
@@ -41,13 +44,19 @@ export default function Sidebar({
     onNavigate(screen);
   };
 
+  const confirmLogout = () => {
+    setLogoutOpen(false);
+    onClose();
+    router.replace('/login');
+  };
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={onClose}
+      onRequestClose={() => (logoutOpen ? setLogoutOpen(false) : onClose())}
     >
       <View style={styles.modalContainer}>
 
@@ -204,7 +213,7 @@ export default function Sidebar({
 
                 <Pressable
                   style={styles.logoutButton}
-                  onPress={() => handleNavigate('logout')}
+                  onPress={() => setLogoutOpen(true)}
                 >
                   <Ionicons
                     name="log-out-outline"
@@ -223,6 +232,33 @@ export default function Sidebar({
 
           </LinearGradient>
         </Animated.View>
+
+        {/* LOGOUT CONFIRMATION DIALOG (drawn last so it sits on top of the sidebar) */}
+        {logoutOpen && (
+          <View style={styles.dialogRoot}>
+            <Pressable
+              style={styles.dialogBackdrop}
+              onPress={() => setLogoutOpen(false)}
+            />
+
+            <View style={styles.dialog}>
+              <Text style={styles.dialogTitle}>Log out?</Text>
+              <Text style={styles.dialogMessage}>
+                Are you sure you want to log out?
+              </Text>
+
+              <View style={styles.dialogActions}>
+                <Pressable onPress={confirmLogout}>
+                  <Text style={styles.dialogButton}>Yes</Text>
+                </Pressable>
+
+                <Pressable onPress={() => setLogoutOpen(false)}>
+                  <Text style={styles.dialogButton}>No</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        )}
 
       </View>
     </Modal>
@@ -306,7 +342,7 @@ const styles = StyleSheet.create({
   },
 
   line: {
-    backgroundColor: '#CCCB​CB',
+    backgroundColor: '#CCCBCB',
     height: 2,
     width: '100%',
     marginTop: 20,
@@ -360,6 +396,60 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: 'bold',
     color: '#000000',
+  },
+
+  // LOGOUT DIALOG
+  dialogRoot: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  dialogBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+
+  dialog: {
+    width: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 20,
+    elevation: 20,
+  },
+
+  dialogTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+
+  dialogMessage: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#7A7A7A',
+  },
+
+  dialogActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 28,
+    marginTop: 50,
+  },
+
+  dialogButton: {
+    fontSize: 18,
+    color: '#7CC9E0',
   },
 
 });
