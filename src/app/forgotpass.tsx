@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ComponentRef, useRef, useState } from 'react';
 import { Image, StatusBar, StyleSheet, Text, TextInput, TextInputKeyPressEvent, TouchableOpacity, View } from 'react-native';
@@ -5,7 +6,7 @@ export default function ForgotPass() {
   const router = useRouter();
   const [step, setStep] = useState<'request' | 'verify' | 'reset'>('request');
   const [method, setMethod] = useState<'email' | 'phone'>('email');
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [code, setCode] = useState(['', '', '', '']);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
@@ -16,13 +17,13 @@ export default function ForgotPass() {
     const next = [...code];
     next[index] = digit;
     setCode(next);
-    if (digit && index < 5) inputs.current[index + 1]?.focus();
+    if (digit && index < 3) inputs.current[index + 1]?.focus();
   };
 
- const handleKeyPress = (e: TextInputKeyPressEvent, index: number) => {
-  if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
-    inputs.current[index - 1]?.focus();
-  }
+  const handleKeyPress = (e: TextInputKeyPressEvent, index: number) => {
+    if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
+      inputs.current[index - 1]?.focus();
+    }
   };
 
   const handleReset = () => {
@@ -39,10 +40,12 @@ export default function ForgotPass() {
   };
 
   return (
-    
     <View style={styles.container}>
       <StatusBar hidden />
-
+      <LinearGradient
+         colors={['#EAF8FC', '#edfbff', '#83CDE2']}
+        style={styles.background}
+        ></LinearGradient>
       <Text style={styles.logo}>
         DIGI<Text style={styles.blue}>DIARY</Text>
       </Text>
@@ -86,11 +89,13 @@ export default function ForgotPass() {
             </TouchableOpacity>
           </>
         )}
+
+        {/* STEP 2: OTP verification */}
         {step === 'verify' && (
           <>
-            <Text style={styles.title}>Verify Code</Text>
+            <Text style={styles.title}>OTP Verification</Text>
             <Text style={styles.subtitle}>
-              Enter the 6-digit code sent to your {method === 'phone' ? 'phone number' : 'email'}
+              Please check your {method === 'phone' ? 'phone number' : 'email'} for verification code
             </Text>
 
             <View style={styles.codeRow}>
@@ -109,10 +114,6 @@ export default function ForgotPass() {
               ))}
             </View>
 
-            <TouchableOpacity style={styles.mainButton} onPress={() => setStep('reset')}>
-              <Text style={styles.mainButtonText}>Verify</Text>
-            </TouchableOpacity>
-
             <View style={styles.resendRow}>
               <Text style={styles.resendText}>Didn't get a code? </Text>
               <TouchableOpacity>
@@ -121,6 +122,8 @@ export default function ForgotPass() {
             </View>
           </>
         )}
+
+        {/* STEP 3: new password */}
         {step === 'reset' && (
           <>
             <Text style={styles.title}>Reset Password</Text>
@@ -162,6 +165,13 @@ export default function ForgotPass() {
           <Text style={[styles.blue, styles.bold]}>Back to Login</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Submit button pinned to the bottom, only on the OTP step */}
+      {step === 'verify' && (
+        <TouchableOpacity style={styles.submitButton} onPress={() => setStep('reset')}>
+          <Text style={styles.mainButtonText}>Submit</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -172,6 +182,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
   },
+   background: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+},
   logo: {
     fontSize: 40,
     fontWeight: 'bold',
@@ -251,16 +268,17 @@ const styles = StyleSheet.create({
   },
   codeRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     width: '100%',
+    gap: 14,
     marginBottom: 20,
   },
   codeBox: {
-    width: 38,
-    height: 45,
+    width: 50,
+    height: 44,
     borderWidth: 1,
-    borderColor: '#999',
-    borderRadius: 12,
+    borderColor: '#777',
+    borderRadius: 25,
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -276,6 +294,17 @@ const styles = StyleSheet.create({
   mainButton: {
     width: '100%',
     marginTop: 10,
+    height: 40,
+    borderRadius: 25,
+    backgroundColor: '#08284F',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  submitButton: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    width: 266,
     height: 40,
     borderRadius: 25,
     backgroundColor: '#08284F',
