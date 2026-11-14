@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import {View,Text,StyleSheet,Pressable,Image,Modal,Animated,Dimensions,ScrollView,} from 'react-native';
-import {router} from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useEffect, useRef } from 'react';
+import { Animated, Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View, } from 'react-native';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SIDEBAR_WIDTH = Math.min(SCREEN_WIDTH * 0.82, 320);
 
@@ -186,7 +186,7 @@ export default function Sidebar({
 
                     <Pressable
                       style={styles.sidebarButton}
-                      onPress={() => handleNavigate('trash')}
+                      onPress={() => router.push('/trash')}
                     >
                       <Text style={styles.sidebarTextButton}>
                         Trash

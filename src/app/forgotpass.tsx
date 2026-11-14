@@ -86,8 +86,6 @@ export default function ForgotPass() {
             </TouchableOpacity>
           </>
         )}
-
-        {/* STEP 2: enter the 6-digit code */}
         {step === 'verify' && (
           <>
             <Text style={styles.title}>Verify Code</Text>
@@ -123,8 +121,6 @@ export default function ForgotPass() {
             </View>
           </>
         )}
-
-        {/* STEP 3: new password */}
         {step === 'reset' && (
           <>
             <Text style={styles.title}>Reset Password</Text>

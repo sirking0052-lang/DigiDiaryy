@@ -1,17 +1,43 @@
-import React from 'react';
-import {View,StyleSheet,Pressable,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useState } from 'react';
+import { Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type Props = {
   activeTab?: string;
   onNavigate?: (screen: string) => void;
+  onSelectCategory?: (category: string) => void;
 };
+
+const OPTIONS = ['All Notes', 'Work', 'Personal', 'School'];
 
 export default function BottomNavbar({
   activeTab = 'home',
   onNavigate = () => {},
+  onSelectCategory = () => {},
 }: Props) {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All Notes');
+
+  const handleSelect = (category: string) => {
+  setSelectedCategory(category);
+  onSelectCategory(category);
+  setSheetOpen(false);
+
+  if (category === 'All Notes') {
+    router.navigate('/allNotes');
+  } 
+  else if (category === 'Personal') {
+    router.navigate('/PersonalNotes');
+  }
+  else if (category === 'School') {
+    router.navigate('/SchoolNotes');
+  }
+  else if (category === 'Work') {
+    router.navigate('/workNotes');
+  }
+};
+
   return (
     <View style={styles.wrapper}>
 
@@ -19,19 +45,19 @@ export default function BottomNavbar({
       <View style={styles.navbar}>
 
         {/* MORE */}
-        <Pressable
+        <TouchableOpacity
           style={styles.navItem}
-          onPress={() => onNavigate('more')}
+          onPress={() => setSheetOpen(true)}
         >
           <Ionicons
             name="ellipsis-vertical"
             size={34}
             color="#000000"
           />
-        </Pressable>
+        </TouchableOpacity>
 
         {/* CALENDAR */}
-        <Pressable
+        <TouchableOpacity
           style={styles.navItem}
           onPress={() => onNavigate('calendar')}
         >
@@ -40,34 +66,26 @@ export default function BottomNavbar({
             size={34}
             color="#000000"
           />
-        </Pressable>
+        </TouchableOpacity>
 
         {/* CENTER SPACE */}
         <View style={styles.centerSpace} />
 
-        {/* ANALYTICS */}
-        <Pressable
+        {/* TIMELINE */}
+        <TouchableOpacity
           style={styles.navItem}
-          onPress={() => onNavigate('analytics')}
+          onPress={() => router.push('/timeline')}
         >
-          <Ionicons
-            name="stats-chart-outline"
-            size={36}
-            color="#000000"
-          />
-        </Pressable>
+          <Image source={require('../../assets/appicon/timeline.png')} />
+        </TouchableOpacity>
 
         {/* BUDGET */}
-        <Pressable
+        <TouchableOpacity
           style={styles.navItem}
           onPress={() => onNavigate('budget')}
         >
-          <Ionicons
-            name="wallet-outline"
-            size={35}
-            color="#000000"
-          />
-        </Pressable>
+          <Image source={require('../../assets/appicon/summary.png')} />
+        </TouchableOpacity>
 
       </View>
 
@@ -82,6 +100,35 @@ export default function BottomNavbar({
           color="#FFFFFF"
         />
       </Pressable>
+
+      {/* CATEGORY BOTTOM SHEET */}
+      <Modal
+        visible={sheetOpen}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={() => setSheetOpen(false)}
+      >
+        <View style={styles.modalRoot}>
+          {/* dimmed backdrop: tap to close */}
+          <Pressable style={styles.backdrop} onPress={() => setSheetOpen(false)} />
+
+          <View style={styles.sheet}>
+            {OPTIONS.map((option) => {
+              const active = option === selectedCategory;
+              return (
+                <TouchableOpacity
+                  key={option}
+                  style={[styles.option, active && styles.optionActive]}
+                  onPress={() => handleSelect(option)}
+                >
+                  <Text style={styles.optionText}>{option}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      </Modal>
 
     </View>
   );
@@ -134,6 +181,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 101,
     elevation: 10,
+  },
+
+  modalRoot: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+    backdrop: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.55)',
+},
+
+  sheet: {
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    paddingBottom: 24,
+    gap: 8,
+  },
+
+  option: {
+    height: 68,
+    borderWidth: 1,
+    borderColor: '#000000',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  optionActive: {
+    backgroundColor: '#7CC9E0',
+    borderColor: '#7CC9E0',
+  },
+
+  optionText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
   },
 
 });

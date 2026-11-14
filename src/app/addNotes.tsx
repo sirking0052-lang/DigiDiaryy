@@ -1,12 +1,9 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StatusBar, StyleSheet, Text, View, } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 export default function addNotes(){
     return(
         <View>
-            <View></View>
+            <View>createdAt: new Date(),</View>
         </View>
     )
 }
